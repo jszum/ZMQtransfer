@@ -12,16 +12,19 @@ class ZMQserver:
         self.port = port
 
     def run(self):
-        print 'Server is running'
+        print 'Server is running on %s' % ("tcp://*:%s" % self.port)
         while True:
             message = self.socket.recv()
             print message
-
+            self.socket.send("Accepted %s" % self.port)
 
 
 if __name__ == "__main__":
-    qport = int(sys.argv[1])
-    print qport
+    if len(sys.argv)==2:
+        qport = int(sys.argv[1])
+        server = ZMQserver(qport)
 
-    server = ZMQserver()
+    else:
+        server = ZMQserver()
+
     server.run()
