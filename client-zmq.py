@@ -2,12 +2,13 @@
 
 import zmq
 import sys
+from struct import *
 
 class ZMQClient:
 
     def __init__(self):
         self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REQ)
+        self.socket = self.context.socket(zmq.PUSH)
         self.server_ip = []
         self.server_port = []
 
@@ -17,7 +18,8 @@ class ZMQClient:
 
     def send(self):
         self.socket.connect('tcp://%s:%s' % (self.server_ip[-1], self.server_port[-1]))
-        self.socket.send('Test message')
+        message = pack('>Qhhhhhhhh', 65554,512,0,0,0,0,0,0,0)#,65555,513,0,0,0,0,0,0,0)
+        self.socket.send(message)
         print 'Sent to ' + 'tcp://%s:%s' % (self.server_ip[-1], self.server_port[-1])
 
     def broadcast(self):
