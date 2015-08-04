@@ -2,6 +2,11 @@
 
 import zmq
 import sys
+import os
+import struct
+
+fifo = 'zmqfifo'
+
 
 class ZMQserver:
 
@@ -10,13 +15,22 @@ class ZMQserver:
         self.socket = self.context.socket(zmq.REP)
         self.socket.bind("tcp://*:%s" % port)
         self.port = port
+        self.readings = 192
+
+        self.fifo = open(fifo, 'w')
 
     def run(self):
         print 'Server is running on %s' % ("tcp://*:%s" % self.port)
         while True:
+
             message = self.socket.recv()
-            print message
-            self.socket.send("Accepted %s" % self.port)
+            self.fifo.write(message)
+
+def clean(name):
+    try:
+        os.unlink(name)
+    except:
+        pass
 
 
 if __name__ == "__main__":
@@ -27,4 +41,6 @@ if __name__ == "__main__":
     else:
         server = ZMQserver()
 
+    clean(fifo)
+    os.mkfifo(fifo)
     server.run()
