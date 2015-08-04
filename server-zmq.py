@@ -2,36 +2,38 @@
 
 import zmq
 import sys
-import os
-import struct
+from struct import *
 
 fifo = 'zmqfifo'
 
-
 class ZMQserver:
 
-    def __init__(self, port=5556):
+    def __init__(self, port=54001):
         self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REP)
+        self.socket = self.context.socket(zmq.PULL)
         self.socket.bind("tcp://*:%s" % port)
         self.port = port
-        self.readings = 192
+        self.readings = 1
+        self.csv = 'data.csv'
+        self.fifo = fifo
 
-        self.fifo = open(fifo, 'w')
 
     def run(self):
         print 'Server is running on %s' % ("tcp://*:%s" % self.port)
         while True:
-
             message = self.socket.recv()
-            self.fifo.write(message)
+            record = ''
 
-def clean(name):
-    try:
-        os.unlink(name)
-    except:
-        pass
+            for i in range(self.readings):
+                unpck = unpack('>Qhhhhhhhh', message[0:24])
+                record += ';'.join(str(e) for e in unpck)+';\n'
+                print record
+                self.saveTo(record)
 
+    def saveTo(self, message):
+        f = open(self.csv, 'aw+')
+        f.write(message)
+        f.close()
 
 if __name__ == "__main__":
     if len(sys.argv)==2:
@@ -41,6 +43,4 @@ if __name__ == "__main__":
     else:
         server = ZMQserver()
 
-    clean(fifo)
-    os.mkfifo(fifo)
     server.run()
