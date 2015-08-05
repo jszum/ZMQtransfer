@@ -3,6 +3,7 @@
 import zmq
 import sys
 from struct import *
+import datetime
 
 fifo = 'zmqfifo'
 
@@ -14,27 +15,31 @@ class ZMQserver:
         self.socket.bind("tcp://*:%s" % port)
         self.port = port
         self.readings = 192*4
-        self.csv = 'data.csv'
-        self.fifo = fifo
-        self.file = open(self.csv, 'w+')
 
+        self.binary = datetime.datetime.now().isoformat()[:-6]+'bin'
+        bin = open(self.binary, 'wb+')
+        bin.close()
 
     def run(self):
         print 'Server is running on %s' % ("tcp://*:%s" % self.port)
         while True:
             message = ''
             message = self.socket.recv()
-            record = ''
+            self.saveBin(message)
 
-            for i in range(self.readings):
-                buffer = message[24*i:24*(i+1)]
-                unpck = unpack('<Qhhhhhhhh', buffer)
-                record += ';'.join(str(e) for e in unpck)+';\n'
+            #record = ''
+            # for i in range(self.readings):
+            #     buffer = message[24*i:24*(i+1)]
+            #     unpck = unpack('<Qhhhhhhhh', buffer)
+            #     self.binary.write(str(unpck))
+            #     #record += ';'.join(str(e) for e in unpck)+';\n'
 
-            self.saveTo(record)
+            #self.saveTo(record)
 
-    def saveTo(self, message):
-        self.file.write(message)
+    def saveBin(self, message):
+        bin = open(self.binary, 'awb+')
+        bin.write(message)
+        bin.close()
 
 if __name__ == "__main__":
     if len(sys.argv)==2:
