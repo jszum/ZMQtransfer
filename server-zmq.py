@@ -14,11 +14,12 @@ class ZMQserver:
         self.socket = self.context.socket(zmq.PULL)
         self.socket.bind("tcp://*:%s" % port)
         self.port = port
-        self.readings = 192*4
 
         self.binary = datetime.datetime.now().isoformat()[:-6]+'bin'
-        bin = open(self.binary, 'wb+')
-        bin.close()
+        binar = open(self.binary, 'wb+')
+        binar.close()
+
+        self.fifo = fifo
 
     def run(self):
         print 'Server is running on %s' % ("tcp://*:%s" % self.port)
@@ -26,25 +27,23 @@ class ZMQserver:
             message = ''
             message = self.socket.recv()
             self.saveBin(message)
-
-            #record = ''
-            # for i in range(self.readings):
-            #     buffer = message[24*i:24*(i+1)]
-            #     unpck = unpack('<Qhhhhhhhh', buffer)
-            #     self.binary.write(str(unpck))
-            #     #record += ';'.join(str(e) for e in unpck)+';\n'
-
-            #self.saveTo(record)
+            self.saveFIFO(message)
 
     def saveBin(self, message):
-        bin = open(self.binary, 'awb+')
-        bin.write(message)
-        bin.close()
+        binar = open(self.binary, 'awb+')
+        binar.write(message)
+        binar.close()
+        
+    def saveFIFO(self, message):
+            fif = open(self.fifo, 'wb')
+            fif.write(message)
+            fif.close()
 
 if __name__ == "__main__":
-    if len(sys.argv)==2:
-        qport = int(sys.argv[1])
-        server = ZMQserver(qport)
+
+    if len(sys.argv) == 2:
+        port = int(sys.argv[1])
+        server = ZMQserver(port)
 
     else:
         server = ZMQserver()
