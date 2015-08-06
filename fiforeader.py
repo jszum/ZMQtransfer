@@ -21,8 +21,12 @@ class Reader:
                     if len(buffer)==24:
                         unpck = unpack('<Qhhhhhhhh', buffer)
                         record += ';'.join(str(e) for e in unpck)+';\n'
-            print record
+            self.saveCSV(record)
 
+    def saveCSV(self, record):
+        csv = open('data.csv', 'wa+')
+        csv.write(record)
+        csv.close()
 
 def clean():
     try:
