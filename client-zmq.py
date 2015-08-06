@@ -17,8 +17,7 @@ class ZMQClient:
         self.server_port.append(port)
 
     def generate_msg(self, number):
-
-        return pack('<Qhhhhhhhh', number, 1,0,0,0,0,0,0,0)
+        return pack('<Qhhhhhhhh', number,1,0,0,0,0,0,0,0)
 
     def send(self, message):
         self.socket.connect('tcp://%s:%s' % (self.server_ip[-1], self.server_port[-1]))
@@ -32,11 +31,17 @@ class ZMQClient:
 
     def single_shot(self):
         msg = self.generate_msg(1024)
+        print len(msg)
         self.send(msg)
 
     def test(self):
-        for i in range(192000*5):
-            msg = self.generate_msg(i)
+
+        cntr = 0
+        for session in range(1):
+            msg = ''
+            for i in range(192*4):
+                cntr += 1
+                msg += self.generate_msg(cntr)
             self.send(msg)
 
 
