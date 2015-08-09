@@ -28,7 +28,7 @@ class ZMQserver:
             message = self.socket.recv()
             print "."
             self.saveBin(message)
-            #self.saveFIFO(message)
+            self.saveFIFO(message)
 
     def saveBin(self, message):
         binar = open(self.binary, 'awb+')
