@@ -46,7 +46,7 @@ class PlotLine:
 
 if __name__ == '__main__':
     print(' '.join(sys.argv))
-    channel = 1#sys.argv[1]
+    channel = sys.argv[1]
 
     plot = PlotLine(channel)
     plot.run()
