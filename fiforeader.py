@@ -8,12 +8,13 @@ fifo = 'zmqfifo'
 
 class Reader:
 
-    def __init__(self, port=54001):
+    def __init__(self, csv):
         self.readings = 192*4
         self.fifo = fifo
+        self.csv = csv
 
     def run(self):
-        bin = os.open(self.fifo, os.O_RDWR)
+        bin = os.open(self.fifo, os.O_RDONLY)
 
         while True:
             record = ''
@@ -23,6 +24,7 @@ class Reader:
                 rawdata.append(array.array('h'))
 
             msg = os.read(bin, 24*self.readings)
+
             for i in range(self.readings):
                 buffer = msg[24*i:24*(i+1)]
 
@@ -37,7 +39,7 @@ class Reader:
             self.split(rawdata)
 
     def saveCSV(self, record):
-        csv = open('data.csv', 'wa+')
+        csv = open(self.csv + '.csv', 'wa+')
         csv.write(record)
         csv.close()
 
@@ -49,20 +51,18 @@ class Reader:
             file.close()
 
 
-
 def clean():
     try:
-        os.unlink(fifo)
         for i in range(8):
             os.unlink('fifo'+str(i))
     except:
         pass
-    os.mkfifo(fifo)
     for i in range(8):
         os.mkfifo('fifo'+str(i))
 
 if __name__ == "__main__":
 
     clean()
-    reader = Reader()
+    csvfile = sys.argv[1]
+    reader = Reader(csvfile)
     reader.run()
