@@ -2,6 +2,7 @@
 
 import zmq
 import sys
+import os
 from struct import *
 import datetime
 
@@ -20,6 +21,7 @@ class ZMQserver:
         binar.close()
 
         self.fifo = fifo
+        self.fif = os.open(self.fifo, os.O_RDWR)
 
     def run(self):
         print 'Server is running on %s' % ("tcp://*:%s" % self.port)
@@ -36,11 +38,19 @@ class ZMQserver:
         binar.close()
         
     def saveFIFO(self, message):
-            fif = open(self.fifo, 'wb')
-            fif.write(message)
-            fif.close()
+            os.write(self.fif, message)
+
+
+def clean():
+    try:
+        os.unlink(fifo)
+    except:
+        pass
+    os.mkfifo(fifo)
 
 if __name__ == "__main__":
+
+    clean()
 
     if len(sys.argv) == 2:
         port = int(sys.argv[1])
