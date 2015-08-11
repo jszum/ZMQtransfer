@@ -9,27 +9,31 @@ from struct import *
 
 class PlotLine:
 
-    def __init__(self, channel, interval=100):
+    def __init__(self, refresh=3):
         self.figure = plt.figure()
-        self.interval = interval
-        self.sample_rate = 48000
-        self.samples_per_plot = 192*4
+        self.refresh_per_second = refresh
+        self.samples_per_second = 192*4*1000/8
+        self.interval = 1000.0/self.refresh_per_second
 
-        file = 'fifo'+str(channel)
-        self.fifo = os.open(file, os.O_RDWR)
+        self.samples_per_plot = self.samples_per_second/refresh
+        self.picker = 100
 
     def animate(self, i):
         ax = self.figure.add_subplot(1, 1, 1)
 
         data = ''
-        data = os.read(self.fifo, 2*self.samples_per_plot)
-        y_data = []
-        y_data = unpack('h'*self.samples_per_plot, data)
+        data = sys.stdin.read(2*self.samples_per_plot)
 
+        datay = []
+        datay = unpack('h'*self.samples_per_plot, data)
+
+        y_data = []
         x_data = []
-        length = len(y_data)
-        for i in range(length):
-            x_data.append(i)
+
+        for i in range(self.samples_per_plot/self.picker):
+            y_data.append(datay[i*self.picker])
+            x_data.append(i*self.picker)
+
 
         ax.clear()
         ax = plt.gca()
@@ -45,8 +49,5 @@ class PlotLine:
         plt.show()
 
 if __name__ == '__main__':
-    print(' '.join(sys.argv))
-    channel = sys.argv[1]
-
-    plot = PlotLine(channel)
+    plot = PlotLine()
     plot.run()
