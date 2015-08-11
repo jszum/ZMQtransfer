@@ -2,6 +2,7 @@
 
 from struct import *
 import os
+import sys
 import array
 
 fifo = 'zmqfifo'
@@ -46,6 +47,7 @@ class Reader:
     def split(self, rec):
         for f in range(8):
             data = pack('h'*self.readings, *rec[f])
+
             file = open('fifo'+str(f), 'wab+')
             file.write(data)
             file.close()
