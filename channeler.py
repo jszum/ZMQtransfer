@@ -25,7 +25,7 @@ class PlotLine:
         data = sys.stdin.read(2*self.samples_per_plot)
 
         datay = []
-        datay = unpack('h'*self.samples_per_plot, data)
+        datay = unpack('<'+'h'*self.samples_per_plot, data)
 
         y_data = []
         x_data = []
