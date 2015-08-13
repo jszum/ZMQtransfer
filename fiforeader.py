@@ -19,8 +19,7 @@ class Reader:
             record = ''
             rawdata = []
 
-            for i in range(8):
-                rawdata.append(array.array('h'))
+            rawdata.append(array.array('h'))
 
             msg = sys.stdin.read(24*self.readings)
 
@@ -30,10 +29,10 @@ class Reader:
                 if len(buffer) == 24:
                     unpck = unpack('<Qhhhhhhhh', buffer)
 
-                    rawdata.append(unpck[self.channel+1])
+                    rawdata[0].append(unpck[self.channel+1])
 
-            sys.stdout.write(''.join(str(e) for e in rawdata))
-                    #record += ';'.join(str(e) for e in unpck)+';\n'
+            sys.stdout.write(rawdata[0].tostring())
+            #record += ';'.join(str(e) for e in unpck)+';\n'
             #self.saveCSV(record)
 
     def saveCSV(self, record):
