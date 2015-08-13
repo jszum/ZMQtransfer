@@ -21,7 +21,7 @@ class ZMQserver:
         binar.close()
 
     def run(self):
-        print 'Server is running on %s' % ("tcp://*:%s" % self.port)
+        sys.stderr.write('Server is running on %s' % ("tcp://*:%s" % self.port))
         while True:
             message = ''
             message = self.socket.recv()
