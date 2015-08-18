@@ -9,10 +9,11 @@ from struct import *
 
 class PlotLine:
 
-    def __init__(self, refresh=3):
+    def __init__(self, refresh=2):
         self.figure = plt.figure()
         self.refresh_per_second = refresh
-        self.samples_per_second = 192*4*1000/8
+        self.decimator = 8
+        self.samples_per_second = 96*4*1000/4/self.decimator
         self.interval = 1000.0/self.refresh_per_second
 
         self.samples_per_plot = self.samples_per_second/refresh
