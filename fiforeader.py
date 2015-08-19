@@ -7,12 +7,15 @@ import array
 
 fifo = 'zmqfifo'
 
+
 class Reader:
 
-    def __init__(self, csv="d.csv"):
+    def __init__(self, csv="aa.csv"):
         self.readings = 192*4
         self.csv = csv
         self.channel = 2
+        self.fifo = os.open('zmqfifo', os.O_RDWR | os.O_NONBLOCK)
+
 
     def run(self):
         while True:
@@ -21,7 +24,9 @@ class Reader:
 
             rawdata.append(array.array('h'))
 
+            msg = ''
             msg = sys.stdin.read(24*self.readings)
+            sys.stdin.flush()
 
             for i in range(self.readings):
                 buffer = msg[24*i:24*(i+1)]
@@ -31,17 +36,31 @@ class Reader:
 
                     rawdata[0].append(unpck[self.channel+1])
 
-            sys.stdout.write(rawdata[0].tostring())
+            try:
+                print 'Write'
+                os.write(self.fifo, rawdata[0])
+            except OSError, e:
+                pass
+            #sys.stdout.write(rawdata[0].tostring())
             #record += ';'.join(str(e) for e in unpck)+';\n'
-            #self.saveCSV(record)
 
     def saveCSV(self, record):
         csv = open(self.csv + '.csv', 'wa+')
         csv.write(record)
         csv.close()
 
+
+def clean():
+    try:
+        os.unlink('zmqfifo')
+    except:
+        pass
+
+    os.mkfifo('zmqfifo')
+
 if __name__ == "__main__":
 
-    #csvfile = sys.argv[1]
+    clean()
     reader = Reader()
     reader.run()
+
