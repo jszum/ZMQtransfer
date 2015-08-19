@@ -45,14 +45,17 @@ class frequency(grc_wxgui.top_block_gui):
         # Variables
         ##################################################
         self.samp_rate = samp_rate = 96000
-        self.channel = channel = 0
+        self.baseband = baseband = 60
+
+        self.mem.seek(0)
+        self.channel = channel = int(self.mem.read(1))
 
         ##################################################
         # Blocks
         ##################################################
         self.wxgui_fftsink2_0 = fftsink2.fft_sink_c(
         	self.GetWin(),
-        	baseband_freq=0,
+        	baseband_freq=baseband,
         	y_per_div=10,
         	y_divs=10,
         	ref_level=50,

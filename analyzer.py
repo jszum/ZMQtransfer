@@ -46,7 +46,8 @@ class analyzer(grc_wxgui.top_block_gui):
         # Variables
         ##################################################
         self.samp_rate = samp_rate = 192000
-        self.channel = channel = 0
+        self.mem.seek(0)
+        self.channel = channel = int(self.mem.read(1))
         self.baseband = baseband = 60
 
         ##################################################
