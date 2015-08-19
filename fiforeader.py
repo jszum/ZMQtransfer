@@ -15,10 +15,10 @@ f.write('0')
 
 class Reader:
 
-    def __init__(self, csv="aa.csv"):
+    def __init__(self, csv="dane.csv"):
         self.readings = 192*4
         self.csv = csv
-        self.channel = 2
+        self.channel = 0
         self.fifo = os.open('zmqfifo', os.O_RDWR | os.O_NONBLOCK)
 
 
@@ -26,7 +26,6 @@ class Reader:
         while True:
             f.seek(0)
             self.channel = int(f.read(1))
-            print 'channel '+str(self.channel)
 
             record = ''
             rawdata = []
@@ -46,7 +45,6 @@ class Reader:
                     rawdata[0].append(unpck[self.channel+1])
 
             try:
-                print 'Write'
                 os.write(self.fifo, rawdata[0])
             except OSError, e:
                 pass
@@ -57,7 +55,6 @@ class Reader:
         csv = open(self.csv + '.csv', 'wa+')
         csv.write(record)
         csv.close()
-
 
 def clean():
     try:
