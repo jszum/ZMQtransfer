@@ -4,9 +4,14 @@ from struct import *
 import os
 import sys
 import array
+import posix_ipc as ipc
+import mmap
 
 fifo = 'zmqfifo'
+channel = ipc.SharedMemory('/chan', ipc.O_CREAT, size=2)
+f = mmap.mmap(channel.fd, 2)
 
+f.write('0')
 
 class Reader:
 
@@ -19,6 +24,10 @@ class Reader:
 
     def run(self):
         while True:
+            f.seek(0)
+            self.channel = int(f.read(1))
+            print 'channel '+str(self.channel)
+
             record = ''
             rawdata = []
 

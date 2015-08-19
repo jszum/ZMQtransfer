@@ -27,6 +27,8 @@ from gnuradio.wxgui import forms
 from grc_gnuradio import wxgui as grc_wxgui
 from optparse import OptionParser
 import wx
+import posix_ipc as ipc
+import mmap
 
 
 class frequency(grc_wxgui.top_block_gui):
@@ -35,6 +37,9 @@ class frequency(grc_wxgui.top_block_gui):
         grc_wxgui.top_block_gui.__init__(self, title="Frequency")
         _icon_path = "/usr/share/icons/hicolor/32x32/apps/gnuradio-grc.png"
         self.SetIcon(wx.Icon(_icon_path, wx.BITMAP_TYPE_ANY))
+
+        self.channel = ipc.SharedMemory('/chan', ipc.O_CREAT, size=2)
+        self.mem = mmap.mmap(self.channel.fd, 2)
 
         ##################################################
         # Variables
@@ -108,6 +113,8 @@ class frequency(grc_wxgui.top_block_gui):
 
     def set_channel(self, channel):
         self.channel = channel
+        self.mem.seek(0)
+        self.mem.write(str(channel))
         self._channel_slider.set_value(self.channel)
         self._channel_text_box.set_value(self.channel)
 
