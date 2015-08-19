@@ -2,7 +2,6 @@
 
 import zmq
 import sys
-import os
 from struct import *
 import datetime
 
