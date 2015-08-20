@@ -2,7 +2,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Adanalyzer
-# Generated: Thu Aug 20 15:50:42 2015
+# Generated: Thu Aug 20 15:58:12 2015
 ##################################################
 
 if __name__ == '__main__':
@@ -28,6 +28,9 @@ from gnuradio.wxgui import waterfallsink2
 from grc_gnuradio import wxgui as grc_wxgui
 from optparse import OptionParser
 import wx
+import datetime
+import posix_ipc as ipc
+import mmap
 
 
 class adanalyzer(grc_wxgui.top_block_gui):
@@ -37,15 +40,27 @@ class adanalyzer(grc_wxgui.top_block_gui):
         _icon_path = "/usr/share/icons/hicolor/32x32/apps/gnuradio-grc.png"
         self.SetIcon(wx.Icon(_icon_path, wx.BITMAP_TYPE_ANY))
 
+        self.channel = ipc.SharedMemory('/chan', ipc.O_CREAT, size=2)
+        self.mem = mmap.mmap(self.channel.fd, 2)
+
+        self.filerecord = ipc.SharedMemory('/rec', ipc.O_CREAT, size=2)
+        self.rec = mmap.mmap(self.filerecord.fd, 2)
+
+        self.file = ipc.SharedMemory('/file', ipc.O_CREAT, size=19)
+        self.name = mmap.mmap(self.file.fd, 19)
+
         ##################################################
         # Variables
         ##################################################
-        self.binfile = binfile = 777
+        self.binfile = binfile = 'pomiar'
         self.samp_rate = samp_rate = 96000
         self.record = record = binfile
-        self.channel = channel = 0
+
+        self.mem.seek(0)
+        self.channel = channel = int(self.mem.read(1))
+
         self.baseband = baseband = 60
-        self.Recording = Recording = 0
+        self.Recording = Recording = int(self.rec.read(1))
 
         ##################################################
         # Blocks
@@ -156,6 +171,15 @@ class adanalyzer(grc_wxgui.top_block_gui):
 
     def set_record(self, record):
         self.record = record
+
+        self.name.seek(0)
+        self.name.write('\0'*19)
+
+        self.name.seek(0)
+        self.name.write(str(self.record))
+
+        self.name.seek(0)
+        print str(self.name.read(19))
         self._record_text_box.set_value(self.record)
 
     def get_channel(self):
@@ -163,6 +187,8 @@ class adanalyzer(grc_wxgui.top_block_gui):
 
     def set_channel(self, channel):
         self.channel = channel
+        self.mem.seek(0)
+        self.mem.write(str(channel))
         self._channel_slider.set_value(self.channel)
         self._channel_text_box.set_value(self.channel)
 
@@ -179,6 +205,8 @@ class adanalyzer(grc_wxgui.top_block_gui):
 
     def set_Recording(self, Recording):
         self.Recording = Recording
+        self.rec.seek(0)
+        self.rec.write(str(self.Recording))
         self._Recording_chooser.set_value(self.Recording)
 
 

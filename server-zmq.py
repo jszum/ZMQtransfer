@@ -4,8 +4,18 @@ import zmq
 import sys
 from struct import *
 import datetime
+import posix_ipc as ipc
+import mmap
 
 fifo = 'zmqfifo'
+
+record = ipc.SharedMemory('/rec', ipc.O_CREAT, size=2)
+r = mmap.mmap(record.fd, 2)
+r.write('0')
+
+name = ipc.SharedMemory('/file', ipc.O_CREAT, size=19)
+n = mmap.mmap(name.fd, 19)
+
 
 class ZMQserver:
 
@@ -15,9 +25,8 @@ class ZMQserver:
         self.socket.bind("tcp://*:%s" % port)
         self.port = port
 
-        self.binary = datetime.datetime.now().isoformat()[:-6]+'bin'
-        binar = open(self.binary, 'wb+')
-        binar.close()
+        self.rec = 0
+
 
     def run(self):
         sys.stderr.write('Server is running on %s' % ("tcp://*:%s" % self.port))
@@ -28,9 +37,15 @@ class ZMQserver:
             sys.stdout.write(message)
 
     def saveBin(self, message):
-        binar = open(self.binary, 'awb+')
-        binar.write(message)
-        binar.close()
+        r.seek(0)
+        self.rec = int(r.read(1))
+
+        if self.rec == 1:
+            n.seek(0)
+            filename = str(n.read(19))
+            binar = open(filename.rstrip('\0')+'.bin', 'awb+')
+            binar.write(message)
+            binar.close()
 
 if __name__ == "__main__":
 

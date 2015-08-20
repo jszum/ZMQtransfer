@@ -8,10 +8,11 @@ import posix_ipc as ipc
 import mmap
 
 fifo = 'zmqfifo'
+
 channel = ipc.SharedMemory('/chan', ipc.O_CREAT, size=2)
 f = mmap.mmap(channel.fd, 2)
-
 f.write('0')
+
 
 class Reader:
 
